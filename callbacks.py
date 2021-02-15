@@ -7,6 +7,7 @@ import dash_core_components as dcc
 import pandas as pd
 
 from app import app
+from components import make_single_input
 
 
 @app.callback(
@@ -31,39 +32,7 @@ def add_ingredient(values, options, children):
     for value in values:
         if value not in ids:
             label = labels[value]
-            name = dbc.InputGroupAddon(
-                children=label,
-                addon_type="prepend",
-                id={"type": "input-name", "index": value},
-            )
-            input = dbc.Input(
-                type="number",
-                id={"type": "input", "index": value},
-            )
-            units = dbc.InputGroupAddon(
-                id={"type": "inputgroupaddon-units", "index": value},
-                addon_type="append",
-            )
-            if value == "egg":
-                input_size = dcc.Dropdown(
-                    id={"type": "input-eggsize", "index": value},
-                    style={"borderRadius": 0},
-                    options=[
-                        {"value": "small", "label": "small"},
-                        {"value": "medium", "label": "medium"},
-                        {"value": "large", "label": "large"},
-                        {"value": "extra-large", "label": "extra-large"},
-                    ],
-                    placeholder="Select size...",
-                )
-                input_group = [name, input, input_size, units]
-            else:
-                input_group = [name, input, units]
-            child = dbc.InputGroup(
-                id={"type": "inputgroup-ingredients", "index": value},
-                children=input_group,
-                className="mb-2",
-            )
+            child = make_single_input(value, label)
             children.append(child)
 
     return children
