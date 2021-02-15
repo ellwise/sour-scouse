@@ -110,6 +110,21 @@ def set_units(radio_value, dropdown_values):
 
 
 @app.callback(
+    Output({"type": "input", "index": ALL}, "invalid"),
+    [Input({"type": "input", "index": ALL}, "value"), Input("radio-units", "value")],
+    State("dropdown-ingredients", "value"),
+)
+def validate_flour_percentages(values, units, ids):
+    if units == "weight":
+        return [None for v in values]
+    elif units == "percentage":
+        flour_ids = ["flour1", "flour2", "flour3", "flour4"]
+        total = sum(x for x, id in zip(values, ids) if x and id in flour_ids)
+        invalid = abs(100 - total) > 0.01
+        return [invalid if id in flour_ids else None for id in ids]
+
+
+@app.callback(
     Output("pre-convertedweights", "children"),
     [Input("store", "data"), Input("radio-units", "value")],
 )
