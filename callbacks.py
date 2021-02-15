@@ -36,66 +36,34 @@ def add_ingredient(values, options, children):
                 addon_type="prepend",
                 id={"type": "input-name", "index": value},
             )
+            input = dbc.Input(
+                type="number",
+                id={"type": "input", "index": value},
+            )
+            units = dbc.InputGroupAddon(
+                id={"type": "inputgroupaddon-units", "index": value},
+                addon_type="append",
+            )
             if value == "egg":
-                input_count = dbc.Input(
-                    type="number",
-                    id="input-eggcount",
-                )
                 input_size = dcc.Dropdown(
-                    id="input-eggsize",
-                    style={
-                        "flexGrow": 1,
-                        "borderTopLeftRadius": 0,
-                        "borderBottomLeftRadius": 0,
-                        "borderTopRightRadius": 0,
-                        "borderBottomRightRadius": 0,
-                    },
+                    id={"type": "input-eggsize", "index": value},
+                    style={"borderRadius": 0},
                     options=[
-                        {"value": "small", "label": "Small"},
-                        {"value": "medium", "label": "Medium"},
-                        {"value": "large", "label": "Large"},
-                        {"value": "extra-large", "label": "Extra-large"},
+                        {"value": "small", "label": "small"},
+                        {"value": "medium", "label": "medium"},
+                        {"value": "large", "label": "large"},
+                        {"value": "extra-large", "label": "extra-large"},
                     ],
                     placeholder="Select size...",
                 )
-                units = dbc.InputGroupAddon(
-                    children="eggs",
-                    addon_type="append",
-                )
-                hidden_input = dbc.Input(
-                    className="d-none",
-                    id={"type": "input", "index": value},
-                )
-                hidden_units = html.Div(
-                    className="d-none",
-                    id={"type": "inputgroupaddon-units", "index": value},
-                )
-                child = dbc.InputGroup(
-                    id={"type": "inputgroup-ingredients", "index": value},
-                    children=[
-                        name,
-                        hidden_input,
-                        input_count,
-                        input_size,
-                        hidden_units,
-                        units,
-                    ],
-                    className="mb-2",
-                )
+                input_group = [name, input, input_size, units]
             else:
-                input = dbc.Input(
-                    type="number",
-                    id={"type": "input", "index": value},
-                )
-                units = dbc.InputGroupAddon(
-                    id={"type": "inputgroupaddon-units", "index": value},
-                    addon_type="append",
-                )
-                child = dbc.InputGroup(
-                    id={"type": "inputgroup-ingredients", "index": value},
-                    children=[name, input, units],
-                    className="mb-2",
-                )
+                input_group = [name, input, units]
+            child = dbc.InputGroup(
+                id={"type": "inputgroup-ingredients", "index": value},
+                children=input_group,
+                className="mb-2",
+            )
             children.append(child)
 
     return children
@@ -107,6 +75,16 @@ def hide_weights(value):
         raise PreventUpdate
     return "d-none" if value == "weight" else "percentage"
 
+@app.callback(
+    [Output({"type": "input-eggsize", "index": "egg"}, "className"),
+    Output({"type": "input-eggsize", "index": "egg"}, "style")],
+    Input("radio-units","value"),
+    State({"type": "input-eggsize", "index": "egg"}, "style")
+)
+def hide_style_eggsize(units, style):
+    class_name = "d-none" if units == "percentage" else "d-block"
+    style["flexGrow"] = 1 if units == "weight" else 0
+    return class_name, style
 
 @app.callback(
     Output({"type": "inputgroupaddon-units", "index": ALL}, "children"),
@@ -116,26 +94,13 @@ def hide_weights(value):
 def set_units(radio_value, dropdown_values):
     if not radio_value:
         raise PreventUpdate
-    n = len(dropdown_values)
-    units = "g" if radio_value == "weight" else "%"
-    return [units] * n
-
-
-@app.callback(
-    Output({"type": "input", "index": "egg"}, "value"),
-    [Input("input-eggcount", "value"), Input("input-eggsize", "value")],
-)
-def set_count_inputs(number, size):
-    if not number or not size:
-        raise PreventUpdate
-    egg_weights = {
-        "small": 40,
-        "medium": 50,
-        "large": 60,
-        "extra-large": 80,
-    }
-    return number * egg_weights[size]
-
+    units = [
+        "eggs" if radio_value == "weight" and v == "egg"
+        else "g" if radio_value == "weight"
+        else "%"
+        for v in dropdown_values
+    ]
+    return units
 
 @app.callback(
     Output("cardbody-convertedweights", "children"),
@@ -191,6 +156,7 @@ def calculate_hydration(data):
     Output("store", "data"),
     [
         Input({"type": "input", "index": ALL}, "value"),
+        Input({"type": "input-eggsize", "index": ALL}, "value"),
         Input("radio-units", "value"),
         Input("input-itemno", "value"),
         Input("input-itemweight", "value"),
@@ -200,7 +166,7 @@ def calculate_hydration(data):
         State({"type": "input-name", "index": ALL}, "children"),
     ],
 )
-def update_store(values, units, item_no, item_weight, ids, names):
+def update_store(values, egg_sizes, units, item_no, item_weight, ids, names):
 
     # add ingredients
     indices = [id["index"] for id in ids]
@@ -214,9 +180,23 @@ def update_store(values, units, item_no, item_weight, ids, names):
     # add weights
     if units == "weight":
         df["weights"] = values
+        if egg_sizes:
+            egg_mask = df["indices"] == "egg"
+            df["egg_sizes"] = None
+            df.loc[egg_mask, "egg_sizes"] = egg_sizes
+            egg_weights = {
+                "small": 40,
+                "medium": 50,
+                "large": 60,
+                "extra-large": 80,
+            }
+            df.loc[egg_mask, "weights"] = df[egg_mask].apply(
+                lambda row: row["weights"] * egg_weights[row["egg_sizes"]] if row["egg_sizes"] else None,
+                axis=1
+            )
         flour_mask = df["indices"].isin(["flour1", "flour2", "flour3", "flour4"])
         flour_weight = df.loc[flour_mask, "weights"].sum()
-        df["percentages"] = [100 * v / flour_weight if v else None for v in values]
+        df["percentages"] = df["weights"].apply(lambda v: 100 * v / flour_weight if v else None)
     elif units == "percentage":
         df["percentages"] = values
         if not item_no or not item_weight:
