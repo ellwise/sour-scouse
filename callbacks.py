@@ -205,7 +205,7 @@ def update_store(values, egg_sizes, units, item_no, item_weight, ids, names):
         flour_mask = df["indices"].isin(["flour1", "flour2", "flour3", "flour4"])
         flour_weight = df.loc[flour_mask, "weights"].sum()
         df["percentages"] = df["weights"].apply(
-            lambda v: 100 * v / flour_weight if v else None
+            lambda v: 100 * v / flour_weight if v and flour_weight > 0 else None
         )
     elif units == "percentage":
         df["percentages"] = values
