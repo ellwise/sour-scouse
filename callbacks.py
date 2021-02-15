@@ -75,16 +75,20 @@ def hide_weights(value):
         raise PreventUpdate
     return "d-none" if value == "weight" else "percentage"
 
+
 @app.callback(
-    [Output({"type": "input-eggsize", "index": "egg"}, "className"),
-    Output({"type": "input-eggsize", "index": "egg"}, "style")],
-    Input("radio-units","value"),
-    State({"type": "input-eggsize", "index": "egg"}, "style")
+    [
+        Output({"type": "input-eggsize", "index": "egg"}, "className"),
+        Output({"type": "input-eggsize", "index": "egg"}, "style"),
+    ],
+    Input("radio-units", "value"),
+    State({"type": "input-eggsize", "index": "egg"}, "style"),
 )
 def hide_style_eggsize(units, style):
     class_name = "d-none" if units == "percentage" else "d-block"
     style["flexGrow"] = 1 if units == "weight" else 0
     return class_name, style
+
 
 @app.callback(
     Output({"type": "inputgroupaddon-units", "index": ALL}, "children"),
@@ -95,12 +99,15 @@ def set_units(radio_value, dropdown_values):
     if not radio_value:
         raise PreventUpdate
     units = [
-        "eggs" if radio_value == "weight" and v == "egg"
-        else "g" if radio_value == "weight"
+        "eggs"
+        if radio_value == "weight" and v == "egg"
+        else "g"
+        if radio_value == "weight"
         else "%"
         for v in dropdown_values
     ]
     return units
+
 
 @app.callback(
     Output("cardbody-convertedweights", "children"),
@@ -117,16 +124,23 @@ def convert_weights(data, units):
     # calculate percentages given grams
     if units == "weight":
         mask = df["percentages"].notna()
+        width = df.loc[mask, "percentages"].apply(lambda x: len(str(int(x)))).max()
         txt += "\n".join(
-            f"{row['percentages']:3.0f}% is {row['names']}"
+            "{num:{width}.0f}% {name}".format(
+                num=row["percentages"], width=width, name=row["names"]
+            )
             for _, row in df[mask].iterrows()
         )
 
     # calculate grams given percentages
     elif units == "percentage":
         mask = df["weights"].notna()
+        width = df.loc[mask, "weights"].apply(lambda x: len(str(int(x)))).max()
         txt += "\n".join(
-            f"{row['weights']:.0f}g is {row['names']}" for _, row in df[mask].iterrows()
+            "{num:{width}.0f}g {name}".format(
+                num=row["weights"], width=width, name=row["names"]
+            )
+            for _, row in df[mask].iterrows()
         )
 
     return txt
@@ -144,8 +158,16 @@ def calculate_hydration(data):
 
     df = pd.DataFrame.from_dict(data)
     mask = df[["hydration_percentages", "hydration_weights"]].notna().all(axis=1)
+    width = (
+        df.loc[mask, "hydration_percentages"].apply(lambda x: len(str(int(x)))).max()
+    )
     txt += "\n".join(
-        f"{row['hydration_percentages']:3.0f}% ({row['hydration_weights']:.0f}g) from {row['names']}"
+        "{num1:{width}.0f}% ({num2:.0f}g) {name}".format(
+            num1=row["hydration_percentages"],
+            width=width,
+            num2=row["hydration_weights"],
+            name=row["names"],
+        )
         for _, row in df[mask].iterrows()
     )
 
@@ -191,12 +213,16 @@ def update_store(values, egg_sizes, units, item_no, item_weight, ids, names):
                 "extra-large": 80,
             }
             df.loc[egg_mask, "weights"] = df[egg_mask].apply(
-                lambda row: row["weights"] * egg_weights[row["egg_sizes"]] if row["egg_sizes"] else None,
-                axis=1
+                lambda row: row["weights"] * egg_weights[row["egg_sizes"]]
+                if row["egg_sizes"]
+                else None,
+                axis=1,
             )
         flour_mask = df["indices"].isin(["flour1", "flour2", "flour3", "flour4"])
         flour_weight = df.loc[flour_mask, "weights"].sum()
-        df["percentages"] = df["weights"].apply(lambda v: 100 * v / flour_weight if v else None)
+        df["percentages"] = df["weights"].apply(
+            lambda v: 100 * v / flour_weight if v else None
+        )
     elif units == "percentage":
         df["percentages"] = values
         if not item_no or not item_weight:
