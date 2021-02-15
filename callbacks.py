@@ -110,7 +110,7 @@ def set_units(radio_value, dropdown_values):
 
 
 @app.callback(
-    Output("cardbody-convertedweights", "children"),
+    Output("pre-convertedweights", "children"),
     [Input("store", "data"), Input("radio-units", "value")],
 )
 def convert_weights(data, units):
@@ -147,7 +147,7 @@ def convert_weights(data, units):
 
 
 @app.callback(
-    Output("cardbody-calculatedhydration", "children"),
+    Output("pre-calculatedhydration", "children"),
     Input("store", "data"),
 )
 def calculate_hydration(data):

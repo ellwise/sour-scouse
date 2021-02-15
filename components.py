@@ -75,8 +75,8 @@ outputs = html.Div(
         html.H5("Outputs"),
         dbc.Row(
             [
-                dbc.Col(html.Pre(id="cardbody-convertedweights")),
-                dbc.Col(html.Pre(id="cardbody-calculatedhydration")),
+                dbc.Col(html.Pre(id="pre-convertedweights")),
+                dbc.Col(html.Pre(id="pre-calculatedhydration")),
             ]
         ),
     ]
