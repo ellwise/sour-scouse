@@ -1,0 +1,12 @@
+production:
+    project_name: sour-scouse
+    app_function: run.server
+    aws_region: us-east-1
+    s3_bucket: sour-scouse-zappa
+    slim_handler: true
+    runtime: python3.7
+    keep_warm: true
+    timeout_seconds: 30
+    route53_enabled: false
+    certificate_arn: arn:aws:acm:us-east-1:136473752220:certificate/95b3453c-e20e-43ed-8829-cc0dbae1a274
+    domain: breaducation.ellwise.com
