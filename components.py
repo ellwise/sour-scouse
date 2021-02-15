@@ -99,7 +99,12 @@ def make_single_input(value, label):
     if value == "egg":
         input_size = dcc.Dropdown(
             id={"type": "input-eggsize", "index": value},
-            style={"borderRadius": 0},
+            style={
+                "borderRadius": 0,
+                "marginBottom": -1,
+                "marginLeft": -1,
+                "marginRight": -1,
+            },
             options=[
                 {"value": "small", "label": "small"},
                 {"value": "medium", "label": "medium"},
