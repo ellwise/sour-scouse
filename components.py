@@ -39,6 +39,34 @@ inputs = html.Div(
             )
         ),
         html.Div(
+            id="div-scale",
+            children=[
+                dbc.InputGroup(
+                    className="mb-2",
+                    children=[
+                        dbc.InputGroupAddon("Current weight", addon_type="prepend"),
+                        dbc.Input(
+                            id="input-total",
+                            disabled=True,
+                            style={"background-color": "#ffffff"},
+                        ),
+                        dbc.InputGroupAddon("g", addon_type="append"),
+                    ],
+                ),
+                dbc.InputGroup(
+                    className="mb-2",
+                    children=[
+                        dbc.InputGroupAddon(
+                            dbc.Button(id="button-scale", children="Scale inputs to"),
+                            addon_type="prepend",
+                        ),
+                        dbc.Input(id="input-desired", type="number"),
+                        dbc.InputGroupAddon("g", addon_type="append"),
+                    ],
+                ),
+            ],
+        ),
+        html.Div(
             id="div-weight",
             className="d-none",
             children=[
@@ -82,6 +110,7 @@ outputs = html.Div(
     ]
 )
 
+
 def make_single_input(value, label):
     name = dbc.InputGroupAddon(
         children=label,
@@ -101,7 +130,8 @@ def make_single_input(value, label):
             id={"type": "input-eggsize", "index": value},
             style={
                 "borderRadius": 0,
-                "marginBottom": -1,
+                "paddingBottom": 0.5,
+                "marginBottom": -0.5,
                 "marginLeft": -1,
                 "marginRight": -1,
             },

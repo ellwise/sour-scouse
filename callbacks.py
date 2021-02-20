@@ -42,7 +42,50 @@ def add_ingredient(values, options, children):
 def hide_weights(value):
     if not value:
         raise PreventUpdate
-    return "d-none" if value == "weight" else "percentage"
+    return "d-none" if value == "weight" else "d-block"
+
+
+@app.callback(Output("div-scale", "className"), Input("radio-units", "value"))
+def hide_scale(value):
+    if not value:
+        raise PreventUpdate
+    return "d-none" if value == "percentage" else "d-block"
+
+
+@app.callback(Output("input-total", "value"), Input("store", "data"))
+def show_total(data):
+    if not data:
+        raise PreventUpdate
+    df = pd.DataFrame.from_dict(data)
+    total = df["weights"].sum()
+    return total
+
+
+@app.callback(
+    Output({"type": "input", "index": ALL}, "value"),
+    Input("button-scale", "n_clicks"),
+    [
+        State("input-total", "value"),
+        State("input-desired", "value"),
+        State({"type": "input", "index": ALL}, "value"),
+    ],
+)
+def scale_inputs(n, total, desired, values):
+    if not n:
+        raise PreventUpdate
+    scale = desired / total
+    values = [v * scale if v else v for v in values]
+    return values
+
+
+@app.callback(
+    Output("input-desired", "value"),
+    Input("button-scale", "n_clicks"),
+)
+def reset_desired(n):
+    if not n:
+        raise PreventUpdate
+    return None
 
 
 @app.callback(
