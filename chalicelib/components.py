@@ -1,7 +1,7 @@
 import dash_core_components as dcc
 import dash_html_components as html
-
 import dash_bootstrap_components as dbc
+
 
 options = [
     {"value": "flour1", "label": "Flour 1"},
@@ -44,7 +44,9 @@ inputs = html.Div(
                 dbc.InputGroup(
                     className="mb-2",
                     children=[
-                        dbc.InputGroupAddon("Current weight", addon_type="prepend"),
+                        dbc.InputGroupAddon(
+                            "Current weight", addon_type="prepend"
+                        ),
                         dbc.Input(
                             id="input-total",
                             disabled=True,
@@ -57,7 +59,9 @@ inputs = html.Div(
                     className="mb-2",
                     children=[
                         dbc.InputGroupAddon(
-                            dbc.Button(id="button-scale", children="Scale inputs to"),
+                            dbc.Button(
+                                id="button-scale", children="Scale inputs to"
+                            ),
                             addon_type="prepend",
                         ),
                         dbc.Input(id="input-desired", type="number"),
@@ -73,14 +77,18 @@ inputs = html.Div(
                 dbc.InputGroup(
                     className="mb-2",
                     children=[
-                        dbc.InputGroupAddon("Number of items", addon_type="prepend"),
+                        dbc.InputGroupAddon(
+                            "Number of items", addon_type="prepend"
+                        ),
                         dbc.Input(id="input-itemno", type="number"),
                     ],
                 ),
                 dbc.InputGroup(
                     className="mb-2",
                     children=[
-                        dbc.InputGroupAddon("Weight per item", addon_type="prepend"),
+                        dbc.InputGroupAddon(
+                            "Weight per item", addon_type="prepend"
+                        ),
                         dbc.Input(id="input-itemweight", type="number"),
                         dbc.InputGroupAddon("g", addon_type="append"),
                     ],

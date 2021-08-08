@@ -1,19 +1,18 @@
-from dash.dependencies import Input, Output, State, MATCH, ALL
+from dash.dependencies import Input, Output, State, ALL
 from dash.exceptions import PreventUpdate
-import dash_bootstrap_components as dbc
-import dash_html_components as html
-import dash_core_components as dcc
-
 import pandas as pd
 
-from app import app
-from components import make_single_input
+from .app import app
+from .components import make_single_input
 
 
 @app.callback(
     Output("div-ingredients", "children"),
     Input("dropdown-ingredients", "value"),
-    [State("dropdown-ingredients", "options"), State("div-ingredients", "children")],
+    [
+        State("dropdown-ingredients", "options"),
+        State("div-ingredients", "children"),
+    ],
 )
 def add_ingredient(values, options, children):
 
@@ -23,7 +22,9 @@ def add_ingredient(values, options, children):
     # drop removed children
     if len(children) > 0:
         children = [
-            child for child in children if child["props"]["id"]["index"] in values
+            child
+            for child in children
+            if child["props"]["id"]["index"] in values
         ]
 
     # add new children
@@ -136,7 +137,9 @@ def convert_weights(data, units):
     # calculate percentages given grams
     if units == "weight":
         mask = df["percentages"].notna()
-        width = df.loc[mask, "percentages"].apply(lambda x: len(str(int(x)))).max()
+        width = (
+            df.loc[mask, "percentages"].apply(lambda x: len(str(int(x)))).max()
+        )
         txt += "\n".join(
             "{num:{width}.0f}% {name}".format(
                 num=row["percentages"], width=width, name=row["names"]
@@ -169,9 +172,13 @@ def calculate_hydration(data):
         return txt
 
     df = pd.DataFrame.from_dict(data)
-    mask = df[["hydration_percentages", "hydration_weights"]].notna().all(axis=1)
+    mask = (
+        df[["hydration_percentages", "hydration_weights"]].notna().all(axis=1)
+    )
     width = (
-        df.loc[mask, "hydration_percentages"].apply(lambda x: len(str(int(x)))).max()
+        df.loc[mask, "hydration_percentages"]
+        .apply(lambda x: len(str(int(x))))
+        .max()
     )
     txt += "\n".join(
         "{num1:{width}.0f}% ({num2:.0f}g) {name}".format(
@@ -230,10 +237,14 @@ def update_store(values, egg_sizes, units, item_no, item_weight, ids, names):
                 else None,
                 axis=1,
             )
-        flour_mask = df["indices"].isin(["flour1", "flour2", "flour3", "flour4"])
+        flour_mask = df["indices"].isin(
+            ["flour1", "flour2", "flour3", "flour4"]
+        )
         flour_weight = df.loc[flour_mask, "weights"].sum()
         df["percentages"] = df["weights"].apply(
-            lambda v: 100 * v / flour_weight if v and flour_weight > 0 else None
+            lambda v: 100 * v / flour_weight
+            if v and flour_weight > 0
+            else None
         )
     elif units == "percentage":
         df["percentages"] = values
@@ -241,7 +252,9 @@ def update_store(values, egg_sizes, units, item_no, item_weight, ids, names):
             df["weights"] = None
         else:
             dough_weight = item_no * item_weight
-            df["weights"] = df["percentages"] / df["percentages"].sum() * dough_weight
+            df["weights"] = (
+                df["percentages"] / df["percentages"].sum() * dough_weight
+            )
 
     # calculate hydration
     df["hydration_indices"] = df["indices"].map(

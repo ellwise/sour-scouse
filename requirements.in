@@ -1,5 +1,6 @@
+black
+chalice
 dash
 dash-bootstrap-components
+flake8
 pandas
-zappa
-black
