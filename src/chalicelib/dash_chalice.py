@@ -127,15 +127,18 @@ class DashChalice(Dash):
         if app is not None:
             self.server = app
 
-        scripts = self._generate_scripts_html().splitlines()
-        endpoints = [tuple(script[37:-11].split("/", 1)) for script in scripts]
-        for package_name, fingerprinted_path in endpoints:
-            self._add_url(
-                f"_dash-component-suites/{package_name}/{fingerprinted_path}",
-                lambda *args, **kwargs: self.serve_component_suites(
-                    package_name, fingerprinted_path
-                ),
-            )
+        # nb: below is commented out because it is not used when the kwarg
+        # `serve_locally` is False - if included, chalice will fail to deploy
+        # because some paths contain the invalid character "@"
+        # scripts = self._generate_scripts_html().splitlines()
+        # noqa:E501 # endpoints = [tuple(script[31:-11].split("/", 1)) for script in scripts]
+        # for package_name, fingerprinted_path in endpoints:
+        #     self._add_url(
+        #         f"_dash-component-suites/{package_name}/{fingerprinted_path}",
+        #         lambda *args, **kwargs: self.serve_component_suites(
+        #             package_name, fingerprinted_path
+        #         ),
+        #     )
         self._add_url("_dash-layout", self.serve_layout)
         self._add_url("_dash-dependencies", self.dependencies)
         self._add_url(
@@ -145,8 +148,12 @@ class DashChalice(Dash):
         self._add_url("_favicon.ico", self._serve_default_favicon)
         self._add_url("", self.index)
 
+        # nb: below is commented out because it is not used when the kwarg
+        # `serve_locally` is False - if included, chalice will fail to deploy
+        # because the path contains the invalid characters "<", ">", and
+        # possibly ":"
         # catch-all for front-end routes, used by dcc.Location
-        self._add_url("<path:path>", self.index)
+        # self._add_url("<path:path>", self.index)
 
     # this method is based on the equivalent parent method, but heavily
     # modified to register as chalice endpoints
