@@ -1,4 +1,4 @@
-from .dash_chalice import DashChalice
+from dash_chalice import DashChalice
 import dash_bootstrap_components as dbc
 
 # A value for `requests_pathname_prefix` is not needed locally nor when a
