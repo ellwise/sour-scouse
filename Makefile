@@ -45,5 +45,20 @@ package:
 run:
 	cd src; chalice local
 
+update:
+	cd src/.package; \
+	aws cloudformation package \
+		--template-file sam.json \
+		--s3-bucket $(bucket) \
+		--output-template-file sam-packaged.yaml; \
+	aws --region $(region) cloudformation deploy \
+		--template-file sam-packaged.yaml \
+		--stack-name $(stackname) \
+		--capabilities CAPABILITY_IAM; \
+	aws --region $(region) cloudformation wait stack-create-complete --stack-name $(stackname); \
+	aws --region $(region) cloudformation describe-stacks \
+		--stack-name $(stackname) \
+		--query 'Stacks[0].Outputs[3].OutputValue';
+
 venv:
 	python -m venv venv
