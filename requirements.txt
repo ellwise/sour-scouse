@@ -1,6 +1,6 @@
 black
 dash
-dash-bootstrap-components
+dash-bootstrap-components==0.13.1
 dash-chalice
 flake8
 gunicorn
