@@ -1,4 +1,7 @@
+black
 dash
 dash-bootstrap-components
 dash-chalice
+flake8
+gunicorn
 pandas
